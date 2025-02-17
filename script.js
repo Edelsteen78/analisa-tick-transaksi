@@ -1,190 +1,150 @@
 const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
-let stockChart, forexChart, commodityChart;
+let stockChart, forexChart, commodityChart, candleChart;
 let autoFetchInterval;
 
-// Simbol populer untuk masing-masing kategori
+// Simbol populer
 const STOCKS = ["AAPL", "TSLA", "AMZN"];
 const FOREX = ["EUR/USD", "GBP/USD", "USD/JPY"];
 const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI"];
 
 // Fungsi untuk membuat checkbox berdasarkan simbol
 function generateCheckboxes() {
-  createCheckboxes("stockList", STOCKS, "stock");
-  createCheckboxes("forexList", FOREX, "forex");
-  createCheckboxes("commodityList", COMMODITIES, "commodity");
+    createCheckboxes("stockList", STOCKS, "stock");
+    createCheckboxes("forexList", FOREX, "forex");
+    createCheckboxes("commodityList", COMMODITIES, "commodity");
 
-  restoreCheckboxState();
-
-  // Jalankan auto-fetch jika ada yang dicentang sebelumnya
-  if (localStorage.getItem("autoFetchRunning") === "true") {
-    autoFetchData();
-  }
+    restoreCheckboxState();
+    if (localStorage.getItem("autoFetchRunning") === "true") {
+        autoFetchData();
+    }
 }
 
-// Fungsi untuk membuat checkbox per kategori
+// Fungsi untuk membuat checkbox kategori
 function createCheckboxes(containerId, symbols, className) {
-  const container = document.getElementById(containerId);
-  symbols.forEach(symbol => {
-    let checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = symbol;
-    checkbox.classList.add(className);
+    const container = document.getElementById(containerId);
+    symbols.forEach(symbol => {
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = symbol;
+        checkbox.classList.add(className);
+        
+        let label = document.createElement("label");
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(` ${symbol}`));
 
-    let label = document.createElement("label");
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(` ${symbol}`));
+        container.appendChild(label);
+        container.appendChild(document.createElement("br"));
+    });
 
-    container.appendChild(label);
-    container.appendChild(document.createElement("br"));
-  });
-
-  // Tambahkan event listener untuk menyimpan state saat checkbox diubah
-  document.querySelectorAll(`.${className}`).forEach(checkbox => {
-    checkbox.addEventListener("change", saveCheckboxState);
-  });
+    document.querySelectorAll(`.${className}`).forEach(checkbox => {
+        checkbox.addEventListener("change", saveCheckboxState);
+    });
 }
 
 // Fungsi untuk menyimpan state checkbox ke localStorage
 function saveCheckboxState() {
-  let selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
-  let selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
-  let selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
+    let selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
+    let selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
+    let selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
 
-  localStorage.setItem("selectedStocks", JSON.stringify(selectedStocks));
-  localStorage.setItem("selectedForex", JSON.stringify(selectedForex));
-  localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
+    localStorage.setItem("selectedStocks", JSON.stringify(selectedStocks));
+    localStorage.setItem("selectedForex", JSON.stringify(selectedForex));
+    localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
 }
 
 // Fungsi untuk memulihkan state checkbox dari localStorage
 function restoreCheckboxState() {
-  let selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
-  let selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
-  let selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
+    let selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
+    let selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
+    let selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
 
-  document.querySelectorAll(".stock").forEach(checkbox => {
-    checkbox.checked = selectedStocks.includes(checkbox.value);
-  });
-  document.querySelectorAll(".forex").forEach(checkbox => {
-    checkbox.checked = selectedForex.includes(checkbox.value);
-  });
-  document.querySelectorAll(".commodity").forEach(checkbox => {
-    checkbox.checked = selectedCommodities.includes(checkbox.value);
-  });
+    document.querySelectorAll(".stock").forEach(checkbox => {
+        checkbox.checked = selectedStocks.includes(checkbox.value);
+    });
+    document.querySelectorAll(".forex").forEach(checkbox => {
+        checkbox.checked = selectedForex.includes(checkbox.value);
+    });
+    document.querySelectorAll(".commodity").forEach(checkbox => {
+        checkbox.checked = selectedCommodities.includes(checkbox.value);
+    });
 }
 
 // Fungsi untuk mengambil data dari Alpha Vantage
 async function fetchMarketData(type, symbol) {
-  try {
-    let url = "";
-    if (type === "stock") {
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
-    } else if (type === "forex") {
-      const [from, to] = symbol.split("/");
-      url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${from}&to_symbol=${to}&interval=5min&apikey=${API_KEY}`;
-    } else if (type === "commodity") {
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
+    try {
+        let url = "";
+        if (type === "stock") {
+            url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
+        } else if (type === "forex") {
+            const [from, to] = symbol.split("/");
+            url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${from}&to_symbol=${to}&interval=5min&apikey=${API_KEY}`;
+        } else if (type === "commodity") {
+            url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        return data["Time Series (5min)"] ? Object.keys(data["Time Series (5min)"]).map(time => ({
+            Time: time,
+            Price: parseFloat(data["Time Series (5min)"][time]["1. open"])
+        })).reverse() : null;
+    } catch (error) {
+        console.error(`Gagal mengambil data untuk ${symbol}:`, error);
+        return null;
     }
-
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log(`Response API (${symbol}):`, data);
-
-    if (data["Note"]) {
-      console.warn("⚠ API Rate Limit Tercapai. Menunggu...");
-      return null;
-    }
-
-    if (!data["Time Series (5min)"]) {
-      console.warn(`⚠ Data untuk ${symbol} tidak ditemukan.`);
-      return null;
-    }
-
-    const timeSeries = data["Time Series (5min)"];
-    return Object.keys(timeSeries).map((time) => ({
-      Time: time,
-      Price: parseFloat(timeSeries[time]["1. open"]),
-      Volume: parseFloat(timeSeries[time]["5. volume"]),
-    })).reverse();
-  } catch (error) {
-    console.error(`Gagal mengambil data untuk ${symbol}:`, error);
-    return null;
-  }
 }
 
-// Fungsi untuk menampilkan grafik
-function visualizePrices(data, canvasId, chartRef) {
-  if (!data || !data.length) return;
+// Fungsi untuk menampilkan grafik candle dengan sinyal Buy/Sell
+function visualizeCandleChart(data) {
+    const labels = data.map(row => row.Time);
+    const prices = data.map(row => row.Price);
+    const signals = data.map(row => row.Signal);
 
-  const labels = data.map((row) => row.Time);
-  const prices = data.map((row) => row.Price);
+    const buySignals = signals.map((signal, i) => (signal === "BUY" ? prices[i] : null));
+    const sellSignals = signals.map((signal, i) => (signal === "SELL" ? prices[i] : null));
 
-  const ctx = document.getElementById(canvasId).getContext("2d");
-
-  if (chartRef) {
-    chartRef.destroy();
-  }
-
-  return new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: "Harga",
-          data: prices,
-          borderColor: "blue",
-          borderWidth: 2,
-          fill: false,
+    const ctx = document.getElementById("candleChart").getContext("2d");
+    
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                { label: "Harga", data: prices, borderColor: "blue", borderWidth: 2, fill: false },
+                { label: "BUY", data: buySignals, backgroundColor: "green", pointRadius: 5, type: "scatter" },
+                { label: "SELL", data: sellSignals, backgroundColor: "red", pointRadius: 5, type: "scatter" }
+            ],
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: true },
-      },
-    },
-  });
+        options: { responsive: true, plugins: { legend: { display: true } } }
+    });
 }
 
-// Fungsi untuk mengambil data otomatis berdasarkan checkbox yang dicentang
-async function autoFetchData() {
-  document.getElementById("statusMessage").textContent = "⏳ Mengambil data otomatis...";
-  localStorage.setItem("autoFetchRunning", "true");
-
-  autoFetchInterval = setInterval(async () => {
-    console.log("🔄 Memulai pengambilan data otomatis...");
-
-    const selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
-    const selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
-    const selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
-
-    for (let stock of selectedStocks) {
-      let data = await fetchMarketData("stock", stock);
-      if (data) visualizePrices(data, "stockChart", stockChart);
-    }
-    for (let forex of selectedForex) {
-      let data = await fetchMarketData("forex", forex);
-      if (data) visualizePrices(data, "forexChart", forexChart);
-    }
-    for (let commodity of selectedCommodities) {
-      let data = await fetchMarketData("commodity", commodity);
-      if (data) visualizePrices(data, "commodityChart", commodityChart);
-    }
-  }, 60000);
+// Fungsi untuk menangani upload file CSV
+async function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return alert("Pilih file CSV terlebih dahulu!");
+    const rawData = await parseCSV(file);
+    const analyzedData = analyzeCandle(rawData);
+    visualizeCandleChart(analyzedData);
 }
 
-// Fungsi untuk menghentikan auto-fetch
-function stopAutoFetch() {
-  clearInterval(autoFetchInterval);
-  document.getElementById("statusMessage").textContent = "🛑 Auto-fetching dihentikan.";
-  localStorage.setItem("autoFetchRunning", "false");
+// Fungsi untuk menyimpan berita fundamental
+function saveNews() {
+    const impact = document.querySelector('input[name="impact"]:checked').value;
+    const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
+    localStorage.setItem("newsImpact", impact);
+    localStorage.setItem("newsSentiment", sentiment);
 }
 
-// Fungsi untuk me-refresh halaman otomatis setiap 5 menit
-setTimeout(() => {
-  location.reload();
-}, 300000);
+// Fungsi untuk memuat berita fundamental saat halaman dibuka kembali
+function loadNews() {
+    const impact = localStorage.getItem("newsImpact");
+    const sentiment = localStorage.getItem("newsSentiment");
+    if (impact) document.querySelector(`input[name="impact"][value="${impact}"]`).checked = true;
+    if (sentiment) document.querySelector(`input[name="sentiment"][value="${sentiment}"]`).checked = true;
+}
 
-// Jalankan fungsi untuk membuat checkbox saat halaman dimuat
-window.onload = generateCheckboxes;
+window.onload = function () {
+    generateCheckboxes();
+    loadNews();
+};
