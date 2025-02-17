@@ -2,18 +2,25 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Analisis XAU/USD & EUR/USD</title>
+    <title>Analisis Sentimen & Trading</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Analisis XAU/USD & EUR/USD</h1>
+    <h1>Analisis Sentimen Berita & Trading Emas</h1>
+
+    <h2>Masukkan Berita Fundamental</h2>
+    <textarea id="newsInput" rows="4" cols="50" placeholder="Masukkan berita fundamental di sini..."></textarea>
+    <br>
+    <button onclick="saveNews()">Simpan & Analisis</button>
+    <p id="sentimentScore">Skor Sentimen: -</p>
+    <p id="tradeRecommendation">Rekomendasi: -</p>
 
     <h2>Grafik Candlestick (Support & Resistance)</h2>
     <canvas id="candleChart"></canvas>
 
-    <h2>Grafik Berita Fundamental (Volatilitas)</h2>
-    <canvas id="lineChart"></canvas>
+    <h2>Grafik Dampak Berita Fundamental</h2>
+    <canvas id="eventChart"></canvas>
 
     <h2>Grafik Manajemen Risiko (Stop-Loss & Take-Profit)</h2>
     <canvas id="riskChart"></canvas>
