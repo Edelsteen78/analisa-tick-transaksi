@@ -16,5 +16,20 @@
 
     <h2>Grafik Candlestick</h2>
     <canvas id="candleChart"></canvas>
+
+    <h2>Upload CSV Data Pasar</h2>
+    <form id="upload-form">
+        <input type="file" id="csv-file" accept=".csv">
+        <button type="submit">Upload</button>
+    </form>
+
+    <h2 id="symbol-display">Symbol: </h2>
+
+    <h2>Input Berita Fundamental</h2>
+    <form id="news-form">
+        <textarea id="news-input" rows="4" cols="50" placeholder="Masukkan berita fundamental..."></textarea>
+        <button type="submit">Analyze</button>
+    </form>
+    <p id="news-analysis">Analysis: </p>
 </body>
 </html>
