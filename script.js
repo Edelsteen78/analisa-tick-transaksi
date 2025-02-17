@@ -1,5 +1,5 @@
-const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
-let stockChart, forexChart, commodityChart, transactionChart, fundamentalChart;
+const API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key Alpha Vantage
+let marketChart, transactionChart, fundamentalChart;
 let autoFetchInterval;
 
 // Simbol yang sering dipakai dalam trading
@@ -7,7 +7,7 @@ const STOCKS = ["AAPL", "TSLA", "AMZN"];
 const FOREX = ["EUR/USD", "GBP/USD", "USD/JPY"];
 const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI"];
 
-// Fungsi untuk membuat checkbox berdasarkan simbol
+// Fungsi untuk membuat checkbox dan menyimpan state
 function generateCheckboxes() {
     createCheckboxes("stockList", STOCKS, "stock");
     createCheckboxes("forexList", FOREX, "forex");
@@ -52,6 +52,23 @@ function saveCheckboxState() {
     localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
 }
 
+// Fungsi untuk memulihkan state checkbox dari localStorage
+function restoreCheckboxState() {
+    let selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
+    let selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
+    let selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
+
+    document.querySelectorAll(".stock").forEach(checkbox => {
+        checkbox.checked = selectedStocks.includes(checkbox.value);
+    });
+    document.querySelectorAll(".forex").forEach(checkbox => {
+        checkbox.checked = selectedForex.includes(checkbox.value);
+    });
+    document.querySelectorAll(".commodity").forEach(checkbox => {
+        checkbox.checked = selectedCommodities.includes(checkbox.value);
+    });
+}
+
 // Fungsi untuk mengambil data dari Alpha Vantage
 async function fetchMarketData(type, symbol) {
     try {
@@ -77,18 +94,18 @@ async function fetchMarketData(type, symbol) {
     }
 }
 
-// Fungsi untuk menampilkan grafik transaksi dari CSV
-function visualizeTransactionChart(data) {
+// Fungsi untuk menampilkan grafik market dari Alpha Vantage
+function visualizeMarketChart(data) {
     const labels = data.map(row => row.Time);
     const prices = data.map(row => row.Price);
     
-    const ctx = document.getElementById("transactionChart").getContext("2d");
+    const ctx = document.getElementById("marketChart").getContext("2d");
     
     new Chart(ctx, {
         type: "line",
         data: {
             labels: labels,
-            datasets: [{ label: "Harga Transaksi", data: prices, borderColor: "blue", borderWidth: 2, fill: false }],
+            datasets: [{ label: "Harga Pasar", data: prices, borderColor: "blue", borderWidth: 2, fill: false }],
         },
         options: { responsive: true, plugins: { legend: { display: true } } }
     });
@@ -116,7 +133,7 @@ async function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return alert("Pilih file CSV terlebih dahulu!");
     const rawData = await parseCSV(file);
-    visualizeTransactionChart(rawData);
+    visualizeMarketChart(rawData);
 }
 
 // Fungsi untuk menyimpan berita fundamental
