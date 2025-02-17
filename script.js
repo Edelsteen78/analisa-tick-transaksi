@@ -1,17 +1,35 @@
-const API_KEY = V5YBXFRFAH5PT6UL"; // Ganti dengan API key Anda
+const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API key Anda
+
+// Variabel global untuk menyimpan simbol aktif
+let activeSymbol = null;
+
+// Fungsi untuk menangani klik tombol simbol
+document.querySelectorAll(".symbol-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    // Nonaktifkan semua tombol
+    document.querySelectorAll(".symbol-btn").forEach((btn) => {
+      btn.classList.remove("active");
+    });
+
+    // Aktifkan tombol yang diklik
+    button.classList.add("active");
+
+    // Simpan simbol aktif
+    activeSymbol = button.getAttribute("data-symbol");
+  });
+});
 
 async function fetchData() {
-  const symbol = document.getElementById("symbol").value.toUpperCase();
-  const news = document.getElementById("news").value;
-
-  if (!symbol) {
-    showError("Silakan masukkan simbol.");
+  if (!activeSymbol) {
+    showError("Silakan pilih simbol terlebih dahulu.");
     return;
   }
 
+  const news = document.getElementById("news").value;
+
   try {
     const response = await fetch(
-      `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`
+      `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${activeSymbol}&apikey=${API_KEY}`
     );
     const data = await response.json();
 
