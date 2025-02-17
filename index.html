@@ -1,30 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analisa Tick Transaksi</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex Analysis</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Analisa Tick Transaksi</h1>
-    <input type="file" id="csvFileInput" accept=".csv" />
-    <button onclick="analyzeData()">Analisa Data</button>
-    <button onclick="predictPrice()">Prediksi Harga</button>
+    <div class="container">
+        <h1>Forex Market Analysis</h1>
+        <label for="symbol">Pilih Pasangan Mata Uang:</label>
+        <select id="symbol">
+            <option value="EURUSD">EUR/USD</option>
+            <option value="GBPUSD">GBP/USD</option>
+            <option value="USDJPY">USD/JPY</option>
+        </select>
 
-    <h2>Statistik Dasar</h2>
-    <pre id="statsOutput"></pre>
+        <canvas id="forexChart"></canvas>
+    </div>
 
-    <h2>Grafik Pergerakan Harga</h2>
-    <canvas id="priceChart"></canvas>
-
-    <h2>Hasil Prediksi</h2>
-    <pre id="predictionOutput"></pre>
-  </div>
-
-  <script src="script.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>
