@@ -1,133 +1,139 @@
-const API_KEY = V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
-let marketChart, transactionChart, candleChart, fundamentalChart;
-let autoFetchInterval;
+const API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key Alpha Vantage
+let candleChart, lineChart, riskChart;
 
-// Simbol yang sering dipakai dalam trading
-const STOCKS = ["AAPL", "TSLA", "AMZN"];
-const FOREX = ["EUR/USD", "GBP/USD", "USD/JPY"];
-const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI"];
+// Level Support & Resistance
+const SUPPORT_LEVEL = 2770.03;
+const RESISTANCE_LEVEL = 2885.02;
+const TAKE_PROFIT = 2900;
+const STOP_LOSS = 2770;
+const TARGET_ZONE = [2900, 2920];
 
-// Fungsi untuk membuat checkbox dan menyimpan state
-function generateCheckboxes() {
-    createCheckboxes("stockList", STOCKS, "stock");
-    createCheckboxes("forexList", FOREX, "forex");
-    createCheckboxes("commodityList", COMMODITIES, "commodity");
+// Fungsi untuk mengambil data harga emas dari Alpha Vantage
+async function fetchGoldData() {
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=XAUUSD&interval=5min&apikey=${API_KEY}`;
+    const response = await fetch(url);
+    const data = await response.json();
 
-    restoreCheckboxState();
-    if (localStorage.getItem("autoFetchRunning") === "true") {
-        autoFetchData();
+    if (!data["Time Series (5min)"]) return null;
+
+    return Object.keys(data["Time Series (5min)"]).map(time => ({
+        Time: time,
+        Open: parseFloat(data["Time Series (5min)"][time]["1. open"]),
+        High: parseFloat(data["Time Series (5min)"][time]["2. high"]),
+        Low: parseFloat(data["Time Series (5min)"][time]["3. low"]),
+        Close: parseFloat(data["Time Series (5min)"][time]["4. close"]),
+    })).reverse();
+}
+
+// Fungsi untuk menampilkan **Candlestick Chart**
+async function visualizeCandleChart() {
+    const data = await fetchGoldData();
+    if (!data) {
+        alert("Gagal mengambil data harga emas!");
+        return;
     }
-}
 
-// Fungsi untuk membuat checkbox kategori
-function createCheckboxes(containerId, symbols, className) {
-    const container = document.getElementById(containerId);
-    symbols.forEach(symbol => {
-        let checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = symbol;
-        checkbox.classList.add(className);
-        
-        let label = document.createElement("label");
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(` ${symbol}`));
+    const ctx = document.getElementById("candleChart").getContext("2d");
+    if (candleChart) candleChart.destroy();
 
-        container.appendChild(label);
-        container.appendChild(document.createElement("br"));
-    });
-
-    document.querySelectorAll(`.${className}`).forEach(checkbox => {
-        checkbox.addEventListener("change", saveCheckboxState);
-    });
-}
-
-// Fungsi untuk menyimpan state checkbox ke localStorage
-function saveCheckboxState() {
-    let selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
-    let selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
-    let selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
-
-    localStorage.setItem("selectedStocks", JSON.stringify(selectedStocks));
-    localStorage.setItem("selectedForex", JSON.stringify(selectedForex));
-    localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
-}
-
-// Fungsi untuk mengambil data dari Alpha Vantage
-async function fetchMarketData(type, symbol) {
-    try {
-        let url = "";
-        if (type === "stock") {
-            url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
-        } else if (type === "forex") {
-            const [from, to] = symbol.split("/");
-            url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${from}&to_symbol=${to}&interval=5min&apikey=${API_KEY}`;
-        } else if (type === "commodity") {
-            url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
-        }
-
-        const response = await fetch(url);
-        const data = await response.json();
-        return data["Time Series (5min)"] ? Object.keys(data["Time Series (5min)"]).map(time => ({
-            Time: time,
-            Price: parseFloat(data["Time Series (5min)"][time]["1. open"])
-        })).reverse() : null;
-    } catch (error) {
-        console.error(`Gagal mengambil data untuk ${symbol}:`, error);
-        return null;
-    }
-}
-
-// Fungsi untuk menggabungkan data Alpha Vantage dan CSV dalam satu chart
-function visualizeMarketChart(dataAlpha, dataCSV) {
-    const labels = [...dataAlpha.map(row => row.Time), ...dataCSV.map(row => row.Time)];
-    const prices = [...dataAlpha.map(row => row.Price), ...dataCSV.map(row => row.Price)];
-
-    const ctx = document.getElementById("marketChart").getContext("2d");
-    
-    new Chart(ctx, {
-        type: "line",
+    candleChart = new Chart(ctx, {
+        type: "candlestick",
         data: {
-            labels: labels,
-            datasets: [{ label: "Harga Pasar", data: prices, borderColor: "blue", borderWidth: 2, fill: false }],
-        },
-        options: { responsive: true, plugins: { legend: { display: true } } }
-    });
-}
-
-// Fungsi untuk menampilkan grafik berita fundamental
-function visualizeFundamentalChart(sentiment) {
-    const ctx = document.getElementById("fundamentalChart").getContext("2d");
-
-    new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: ["Positif", "Negatif"],
             datasets: [{
-                data: sentiment === "positif" ? [70, 30] : [30, 70],
-                backgroundColor: ["green", "red"]
+                label: "Harga Emas",
+                data: data.map(row => ({
+                    t: new Date(row.Time),
+                    o: row.Open,
+                    h: row.High,
+                    l: row.Low,
+                    c: row.Close
+                })),
+                borderColor: "blue",
             }]
         },
-        options: { responsive: true, plugins: { legend: { display: true } } }
+        options: {
+            responsive: true,
+            plugins: {
+                annotation: {
+                    annotations: {
+                        resistanceLine: {
+                            type: 'line',
+                            mode: 'horizontal',
+                            scaleID: 'y',
+                            value: RESISTANCE_LEVEL,
+                            borderColor: 'red',
+                            borderWidth: 2,
+                            label: { enabled: true, content: "Resistance" }
+                        },
+                        supportLine: {
+                            type: 'line',
+                            mode: 'horizontal',
+                            scaleID: 'y',
+                            value: SUPPORT_LEVEL,
+                            borderColor: 'green',
+                            borderWidth: 2,
+                            label: { enabled: true, content: "Support" }
+                        }
+                    }
+                }
+            }
+        }
     });
 }
 
-// Fungsi untuk menangani upload file CSV
-async function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return alert("Pilih file CSV terlebih dahulu!");
-    const rawData = await parseCSV(file);
-    visualizeMarketChart([], rawData);
+// Fungsi untuk menampilkan **Line Chart (Berita Fundamental)**
+function visualizeLineChart() {
+    const ctx = document.getElementById("lineChart").getContext("2d");
+    if (lineChart) lineChart.destroy();
+
+    lineChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: ["1 Jan", "5 Jan", "10 Jan", "15 Jan", "20 Jan"],
+            datasets: [
+                {
+                    label: "Harga Emas",
+                    data: [2800, 2850, 2830, 2900, 2920],
+                    borderColor: "blue",
+                    fill: false
+                },
+                {
+                    label: "Event Geopolitik",
+                    data: [null, null, 2830, null, null],
+                    backgroundColor: "red",
+                    type: "scatter",
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: { responsive: true }
+    });
 }
 
-// Fungsi untuk menyimpan berita fundamental
-function saveNews() {
-    const impact = document.querySelector('input[name="impact"]:checked').value;
-    const sentiment = document.querySelector('input[name="sentiment"]:checked").value;
-    localStorage.setItem("newsImpact", impact);
-    localStorage.setItem("newsSentiment", sentiment);
-    visualizeFundamentalChart(sentiment);
+// Fungsi untuk menampilkan **Risk Management Chart**
+function visualizeRiskChart() {
+    const ctx = document.getElementById("riskChart").getContext("2d");
+    if (riskChart) riskChart.destroy();
+
+    riskChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["Stop-Loss", "Entry", "Take-Profit"],
+            datasets: [{
+                label: "Harga ($)",
+                data: [STOP_LOSS, RESISTANCE_LEVEL, TAKE_PROFIT],
+                backgroundColor: ["red", "blue", "green"]
+            }]
+        },
+        options: { responsive: true }
+    });
 }
 
-window.onload = function () {
-    generateCheckboxes();
-};
+// Fungsi untuk menjalankan semua visualisasi secara otomatis
+function runAnalysis() {
+    visualizeCandleChart();
+    visualizeLineChart();
+    visualizeRiskChart();
+}
+
+window.onload = runAnalysis;
