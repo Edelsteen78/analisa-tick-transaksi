@@ -12,6 +12,9 @@ function generateCheckboxes() {
   createCheckboxes("stockList", STOCKS, "stock");
   createCheckboxes("forexList", FOREX, "forex");
   createCheckboxes("commodityList", COMMODITIES, "commodity");
+
+  // Memulihkan pilihan checkbox dari localStorage
+  restoreCheckboxState();
 }
 
 // Fungsi untuk membuat checkbox per kategori
@@ -22,7 +25,6 @@ function createCheckboxes(containerId, symbols, className) {
     checkbox.type = "checkbox";
     checkbox.value = symbol;
     checkbox.classList.add(className);
-    checkbox.checked = true; // Default: Semua simbol dicentang
     
     let label = document.createElement("label");
     label.appendChild(checkbox);
@@ -30,6 +32,39 @@ function createCheckboxes(containerId, symbols, className) {
 
     container.appendChild(label);
     container.appendChild(document.createElement("br"));
+  });
+
+  // Tambahkan event listener untuk menyimpan state saat checkbox diubah
+  document.querySelectorAll(`.${className}`).forEach(checkbox => {
+    checkbox.addEventListener("change", saveCheckboxState);
+  });
+}
+
+// Fungsi untuk menyimpan state checkbox ke localStorage
+function saveCheckboxState() {
+  let selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
+  let selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
+  let selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
+
+  localStorage.setItem("selectedStocks", JSON.stringify(selectedStocks));
+  localStorage.setItem("selectedForex", JSON.stringify(selectedForex));
+  localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
+}
+
+// Fungsi untuk memulihkan state checkbox dari localStorage
+function restoreCheckboxState() {
+  let selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
+  let selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
+  let selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
+
+  document.querySelectorAll(".stock").forEach(checkbox => {
+    checkbox.checked = selectedStocks.includes(checkbox.value);
+  });
+  document.querySelectorAll(".forex").forEach(checkbox => {
+    checkbox.checked = selectedForex.includes(checkbox.value);
+  });
+  document.querySelectorAll(".commodity").forEach(checkbox => {
+    checkbox.checked = selectedCommodities.includes(checkbox.value);
   });
 }
 
@@ -115,9 +150,9 @@ async function autoFetchData() {
   autoFetchInterval = setInterval(async () => {
     console.log("🔄 Memulai pengambilan data otomatis...");
 
-    const selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
-    const selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
-    const selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
+    const selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
+    const selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
+    const selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
 
     for (let stock of selectedStocks) {
       let data = await fetchMarketData("stock", stock);
@@ -131,22 +166,19 @@ async function autoFetchData() {
       let data = await fetchMarketData("commodity", commodity);
       if (data) visualizePrices(data, "commodityChart", commodityChart);
     }
-  }, 60000); // Ambil data setiap 60 detik
-
-  alert("🚀 Auto-fetching dimulai! Data akan diperbarui setiap 60 detik.");
+  }, 60000);
 }
 
 // Fungsi untuk menghentikan auto-fetch
 function stopAutoFetch() {
   clearInterval(autoFetchInterval);
   document.getElementById("statusMessage").textContent = "🛑 Auto-fetching dihentikan.";
-  alert("🛑 Auto-fetching dihentikan.");
 }
 
 // Fungsi untuk me-refresh halaman otomatis setiap 5 menit
 setTimeout(() => {
   location.reload();
-}, 300000); // 300000 ms = 5 menit
+}, 300000);
 
 // Jalankan fungsi untuk membuat checkbox saat halaman dimuat
 window.onload = generateCheckboxes;
