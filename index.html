@@ -1,47 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trading Analysis Tool</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Analisis Trading</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Trading Analysis Tool</h1>
+    <h1>Analisis Trading</h1>
 
-    <!-- Tombol Simbol -->
-    <div class="symbol-buttons">
-      <button class="symbol-btn" data-symbol="AAPL">AAPL</button>
-      <button class="symbol-btn" data-symbol="TSLA">TSLA</button>
-      <button class="symbol-btn" data-symbol="AMZN">AMZN</button>
-      <button class="symbol-btn" data-symbol="EURUSD">EUR/USD</button>
-      <button class="symbol-btn" data-symbol="GBPUSD">GBP/USD</button>
-      <button class="symbol-btn" data-symbol="USDJPY">USD/JPY</button>
-      <button class="symbol-btn" data-symbol="XAUUSD">XAU/USD</button>
-      <button class="symbol-btn" data-symbol="XAGUSD">XAG/USD</button>
-      <button class="symbol-btn" data-symbol="WTI">WTI</button>
-    </div>
+    <h2>Pilih Symbol</h2>
+    <button id="XAU/USD" class="symbol-btn">XAU/USD</button>
+    <button id="EUR/USD" class="symbol-btn">EUR/USD</button>
 
-    <!-- Input Berita Fundamental -->
-    <label for="news">Masukkan Berita Fundamental:</label>
-    <textarea id="news" rows="4" placeholder="Contoh: Senator Rand Paul mengusulkan audit cadangan emas..."></textarea>
-
-    <!-- Tombol Analisis -->
-    <button id="analyzeBtn" onclick="fetchData()">Analisis Sekarang</button>
-
-    <!-- Output Hasil -->
-    <div id="output" class="result" style="display: none;">
-      <h3>Hasil Analisis</h3>
-      <p><strong>Harga Terakhir:</strong> <span id="lastPrice">-</span></p>
-      <p><strong>Rekomendasi:</strong> <span id="recommendation">-</span></p>
-      <p><strong>Target Pip:</strong> <span id="targetPip">-</span></p>
-    </div>
-
-    <!-- Pesan Error -->
-    <div id="error" class="error" style="display: none;"></div>
-  </div>
-
-  <script src="script.js"></script>
+    <h2>Grafik Candlestick</h2>
+    <canvas id="candleChart"></canvas>
 </body>
 </html>
