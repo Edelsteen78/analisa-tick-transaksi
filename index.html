@@ -13,26 +13,18 @@
   <div class="container">
     <h1>Analisis Pasar Otomatis</h1>
 
-    <h2>Analisis Saham</h2>
-    <input type="text" id="stockSymbol" placeholder="Contoh: AAPL, TSLA">
-    <button onclick="getMarketAnalysis('stock')">Ambil Data Saham</button>
-    <pre id="statsStock">Belum ada data.</pre>
+    <h2>Pilih Data yang Akan Diambil Otomatis</h2>
+    <label><input type="checkbox" id="autoStock"> Saham</label>
+    <label><input type="checkbox" id="autoForex"> Forex</label>
+    <label><input type="checkbox" id="autoCommodity"> Komoditas</label>
+    
+    <button onclick="autoFetchData()">Mulai Ambil Data Otomatis</button>
+    <button onclick="stopAutoFetch()">Hentikan</button>
+
+    <h2>Grafik Harga</h2>
     <canvas id="stockChart"></canvas>
-    <pre id="predictionStock">Belum ada prediksi.</pre>
-
-    <h2>Analisis Forex</h2>
-    <input type="text" id="forexSymbol" placeholder="Contoh: EUR, JPY">
-    <button onclick="getMarketAnalysis('forex')">Ambil Data Forex</button>
-    <pre id="statsForex">Belum ada data.</pre>
     <canvas id="forexChart"></canvas>
-    <pre id="predictionForex">Belum ada prediksi.</pre>
-
-    <h2>Analisis Komoditas</h2>
-    <input type="text" id="commoditySymbol" placeholder="Contoh: XAU, XAG">
-    <button onclick="getMarketAnalysis('commodity')">Ambil Data Komoditas</button>
-    <pre id="statsCommodity">Belum ada data.</pre>
     <canvas id="commodityChart"></canvas>
-    <pre id="predictionCommodity">Belum ada prediksi.</pre>
   </div>
 </body>
 </html>
