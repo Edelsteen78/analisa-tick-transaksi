@@ -1,14 +1,33 @@
-const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
+const API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key Alpha Vantage
 let stockChart, forexChart, commodityChart;
 let autoFetchInterval;
 
 // Simbol populer untuk masing-masing kategori
-const STOCKS = ["AAPL", "TSLA", "AMZN", "GOOGL", "MSFT"];
-const FOREX = ["EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD"];
-const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI", "NG"];
+const STOCKS = ["AAPL", "TSLA", "AMZN"];
+const FOREX = ["EUR/USD", "GBP/USD", "USD/JPY"];
+const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI"];
+
+// Fungsi untuk membuat checkbox berdasarkan simbol
+function generateCheckboxes() {
+  const stockContainer = document.getElementById("stockList");
+  const forexContainer = document.getElementById("forexList");
+  const commodityContainer = document.getElementById("commodityList");
+
+  STOCKS.forEach(symbol => {
+    stockContainer.innerHTML += `<label><input type="checkbox" class="stock" value="${symbol}" checked> ${symbol}</label><br>`;
+  });
+
+  FOREX.forEach(symbol => {
+    forexContainer.innerHTML += `<label><input type="checkbox" class="forex" value="${symbol}" checked> ${symbol}</label><br>`;
+  });
+
+  COMMODITIES.forEach(symbol => {
+    commodityContainer.innerHTML += `<label><input type="checkbox" class="commodity" value="${symbol}" checked> ${symbol}</label><br>`;
+  });
+}
 
 // Fungsi untuk mengambil data dari Alpha Vantage
-async function fetchMarketData(type, symbol, market = "USD") {
+async function fetchMarketData(type, symbol) {
   try {
     let url = "";
     if (type === "stock") {
@@ -44,24 +63,6 @@ async function fetchMarketData(type, symbol, market = "USD") {
     console.error(`Gagal mengambil data untuk ${symbol}:`, error);
     return null;
   }
-}
-
-// Fungsi untuk analisis statistik
-function analyzeStatistics(data, outputElementId) {
-  if (!data || !data.length) return;
-
-  const prices = data.map((row) => row.Price).filter((p) => !isNaN(p));
-  const volumes = data.map((row) => row.Volume).filter((v) => !isNaN(v));
-
-  const stats = {
-    totalTransactions: data.length,
-    highestPrice: Math.max(...prices),
-    lowestPrice: Math.min(...prices),
-    averagePrice: (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2),
-    totalVolume: volumes.reduce((sum, volume) => sum + volume, 0),
-  };
-
-  document.getElementById(outputElementId).textContent = JSON.stringify(stats, null, 2);
 }
 
 // Fungsi untuk menampilkan grafik
@@ -106,15 +107,20 @@ async function autoFetchData() {
 
   autoFetchInterval = setInterval(async () => {
     console.log("🔄 Memulai pengambilan data otomatis...");
-    for (let stock of STOCKS) {
+    
+    const selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
+    const selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
+    const selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
+
+    for (let stock of selectedStocks) {
       let data = await fetchMarketData("stock", stock);
       if (data) visualizePrices(data, "stockChart", stockChart);
     }
-    for (let forex of FOREX) {
+    for (let forex of selectedForex) {
       let data = await fetchMarketData("forex", forex);
       if (data) visualizePrices(data, "forexChart", forexChart);
     }
-    for (let commodity of COMMODITIES) {
+    for (let commodity of selectedCommodities) {
       let data = await fetchMarketData("commodity", commodity);
       if (data) visualizePrices(data, "commodityChart", commodityChart);
     }
@@ -129,3 +135,11 @@ function stopAutoFetch() {
   document.getElementById("statusMessage").textContent = "🛑 Auto-fetching dihentikan.";
   alert("🛑 Auto-fetching dihentikan.");
 }
+
+// Fungsi untuk me-refresh halaman otomatis setiap 5 menit
+setTimeout(() => {
+  location.reload();
+}, 300000); // 300000 ms = 5 menit
+
+// Jalankan fungsi untuk membuat checkbox saat halaman dimuat
+generateCheckboxes();
