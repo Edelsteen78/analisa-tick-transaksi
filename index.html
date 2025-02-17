@@ -12,6 +12,22 @@
   <div class="container">
     <h1>Analisis Pasar Otomatis</h1>
 
+    <h2>Pilih Data yang Akan Diambil Otomatis</h2>
+    <div class="selection-box">
+      <h3>Saham</h3>
+      <div id="stockList"></div>
+    </div>
+    
+    <div class="selection-box">
+      <h3>Forex</h3>
+      <div id="forexList"></div>
+    </div>
+
+    <div class="selection-box">
+      <h3>Komoditas</h3>
+      <div id="commodityList"></div>
+    </div>
+
     <button onclick="autoFetchData()">Mulai Ambil Data Otomatis</button>
     <button onclick="stopAutoFetch()">Hentikan</button>
     <p id="statusMessage">Belum berjalan.</p>
