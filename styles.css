@@ -21,34 +21,32 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+h1, h2 {
   text-align: center;
   color: #2c3e50;
   margin-bottom: 20px;
 }
 
-h2 {
-  color: #34495e;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  border-bottom: 2px solid #ecf0f1;
-  padding-bottom: 5px;
-}
-
-input[type="file"] {
+input[type="text"] {
   display: block;
-  margin-bottom: 15px;
+  margin: 0 auto 15px;
   padding: 10px;
-  width: 100%;
+  width: 50%;
   border: 2px solid #bdc3c7;
   border-radius: 5px;
   font-size: 16px;
-  cursor: pointer;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #3498db;
+  background-color: #ecf0f1;
+  outline: none;
 }
 
 button {
-  display: inline-block;
-  margin-right: 10px;
+  display: block;
+  margin: 10px auto;
   padding: 10px 20px;
   background-color: #3498db;
   color: #fff;
@@ -56,36 +54,56 @@ button {
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
   background-color: #2980b9;
+  transform: scale(1.05);
 }
 
-button:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-
-#statsOutput, #predictionOutput {
+pre {
   background-color: #ecf0f1;
   padding: 15px;
   border-radius: 5px;
   font-family: monospace;
   white-space: pre-wrap;
+  text-align: center;
   margin-bottom: 20px;
+  word-wrap: break-word;
+  overflow: auto;
 }
 
 canvas {
   margin-top: 20px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  max-width: 100%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f1f1f1;
+}
+
+.section h2 {
+  border-bottom: 2px solid #bdc3c7;
+  padding-bottom: 5px;
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 15px;
+  }
+
+  input[type="text"] {
+    width: 100%;
   }
 
   button {
