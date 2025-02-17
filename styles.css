@@ -30,3 +30,28 @@ h1, h2 {
 .symbol-btn:hover {
     transform: scale(1.05);
 }
+
+
+form#upload-form {
+    margin-top: 20px;
+}
+
+form#upload-form input[type="file"] {
+    margin: 10px;
+}
+
+form#upload-form button {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: linear-gradient(145deg, #e0e0e0, #ffffff);
+    box-shadow: 3px 3px 6px #bcbcbc, -3px -3px 6px #ffffff;
+    transition: 0.3s;
+}
+
+form#upload-form button:hover {
+    transform: scale(1.05);
+}
