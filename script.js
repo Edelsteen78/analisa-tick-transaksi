@@ -9,20 +9,27 @@ const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI"];
 
 // Fungsi untuk membuat checkbox berdasarkan simbol
 function generateCheckboxes() {
-  const stockContainer = document.getElementById("stockList");
-  const forexContainer = document.getElementById("forexList");
-  const commodityContainer = document.getElementById("commodityList");
+  createCheckboxes("stockList", STOCKS, "stock");
+  createCheckboxes("forexList", FOREX, "forex");
+  createCheckboxes("commodityList", COMMODITIES, "commodity");
+}
 
-  STOCKS.forEach(symbol => {
-    stockContainer.innerHTML += `<label><input type="checkbox" class="stock" value="${symbol}" checked> ${symbol}</label><br>`;
-  });
+// Fungsi untuk membuat checkbox per kategori
+function createCheckboxes(containerId, symbols, className) {
+  const container = document.getElementById(containerId);
+  symbols.forEach(symbol => {
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = symbol;
+    checkbox.classList.add(className);
+    checkbox.checked = true; // Default: Semua simbol dicentang
+    
+    let label = document.createElement("label");
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(` ${symbol}`));
 
-  FOREX.forEach(symbol => {
-    forexContainer.innerHTML += `<label><input type="checkbox" class="forex" value="${symbol}" checked> ${symbol}</label><br>`;
-  });
-
-  COMMODITIES.forEach(symbol => {
-    commodityContainer.innerHTML += `<label><input type="checkbox" class="commodity" value="${symbol}" checked> ${symbol}</label><br>`;
+    container.appendChild(label);
+    container.appendChild(document.createElement("br"));
   });
 }
 
@@ -101,13 +108,13 @@ function visualizePrices(data, canvasId, chartRef) {
   });
 }
 
-// Fungsi untuk mengambil data otomatis
+// Fungsi untuk mengambil data otomatis berdasarkan checkbox yang dicentang
 async function autoFetchData() {
   document.getElementById("statusMessage").textContent = "⏳ Mengambil data otomatis...";
 
   autoFetchInterval = setInterval(async () => {
     console.log("🔄 Memulai pengambilan data otomatis...");
-    
+
     const selectedStocks = [...document.querySelectorAll(".stock:checked")].map(el => el.value);
     const selectedForex = [...document.querySelectorAll(".forex:checked")].map(el => el.value);
     const selectedCommodities = [...document.querySelectorAll(".commodity:checked")].map(el => el.value);
@@ -142,4 +149,4 @@ setTimeout(() => {
 }, 300000); // 300000 ms = 5 menit
 
 // Jalankan fungsi untuk membuat checkbox saat halaman dimuat
-generateCheckboxes();
+window.onload = generateCheckboxes;
