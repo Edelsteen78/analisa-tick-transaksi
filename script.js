@@ -1,4 +1,4 @@
-const API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key Alpha Vantage
+const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
 let stockChart, forexChart, commodityChart;
 let autoFetchInterval;
 
