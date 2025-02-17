@@ -31,7 +31,6 @@ h1, h2 {
     transform: scale(1.05);
 }
 
-
 form#upload-form {
     margin-top: 20px;
 }
@@ -54,4 +53,44 @@ form#upload-form button {
 
 form#upload-form button:hover {
     transform: scale(1.05);
+}
+
+#symbol-display {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+form#news-form {
+    margin-top: 20px;
+}
+
+form#news-form textarea {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+form#news-form button {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: linear-gradient(145deg, #e0e0e0, #ffffff);
+    box-shadow: 3px 3px 6px #bcbcbc, -3px -3px 6px #ffffff;
+    transition: 0.3s;
+}
+
+form#news-form button:hover {
+    transform: scale(1.05);
+}
+
+#news-analysis {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
 }
