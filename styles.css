@@ -28,6 +28,32 @@ h1 {
   font-size: 2rem;
 }
 
+.symbol-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.symbol-btn {
+  padding: 10px 15px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.symbol-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.symbol-btn:hover:not(.active) {
+  background-color: #e0e0e0;
+}
+
 label {
   display: block;
   margin-top: 15px;
@@ -35,7 +61,6 @@ label {
   color: #555;
 }
 
-input[type="text"],
 textarea {
   width: 100%;
   padding: 12px;
@@ -43,21 +68,17 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
+  resize: vertical;
+  min-height: 100px;
   transition: border-color 0.3s ease;
 }
 
-input[type="text"]:focus,
 textarea:focus {
   border-color: #007bff;
   outline: none;
 }
 
-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-button {
+#analyzeBtn {
   display: block;
   width: 100%;
   padding: 12px;
@@ -72,7 +93,7 @@ button {
   transition: background-color 0.3s ease;
 }
 
-button:hover {
+#analyzeBtn:hover {
   background-color: #0056b3;
 }
 
@@ -117,7 +138,7 @@ button:hover {
     font-size: 1.8rem;
   }
 
-  button {
+  #analyzeBtn {
     font-size: 0.9rem;
   }
 }
