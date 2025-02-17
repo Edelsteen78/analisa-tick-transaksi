@@ -9,14 +9,28 @@
 <body>
   <div class="container">
     <h1>Trading Analysis Tool</h1>
-    <label for="symbol">Masukkan Simbol (Saham, Forex, Komoditi):</label>
-    <input type="text" id="symbol" placeholder="Contoh: GOLD, EURUSD, AAPL">
 
+    <!-- Tombol Simbol -->
+    <div class="symbol-buttons">
+      <button class="symbol-btn" data-symbol="AAPL">AAPL</button>
+      <button class="symbol-btn" data-symbol="TSLA">TSLA</button>
+      <button class="symbol-btn" data-symbol="AMZN">AMZN</button>
+      <button class="symbol-btn" data-symbol="EURUSD">EUR/USD</button>
+      <button class="symbol-btn" data-symbol="GBPUSD">GBP/USD</button>
+      <button class="symbol-btn" data-symbol="USDJPY">USD/JPY</button>
+      <button class="symbol-btn" data-symbol="XAUUSD">XAU/USD</button>
+      <button class="symbol-btn" data-symbol="XAGUSD">XAG/USD</button>
+      <button class="symbol-btn" data-symbol="WTI">WTI</button>
+    </div>
+
+    <!-- Input Berita Fundamental -->
     <label for="news">Masukkan Berita Fundamental:</label>
     <textarea id="news" rows="4" placeholder="Contoh: Senator Rand Paul mengusulkan audit cadangan emas..."></textarea>
 
-    <button onclick="fetchData()">Analisis Sekarang</button>
+    <!-- Tombol Analisis -->
+    <button id="analyzeBtn" onclick="fetchData()">Analisis Sekarang</button>
 
+    <!-- Output Hasil -->
     <div id="output" class="result" style="display: none;">
       <h3>Hasil Analisis</h3>
       <p><strong>Harga Terakhir:</strong> <span id="lastPrice">-</span></p>
@@ -24,6 +38,7 @@
       <p><strong>Target Pip:</strong> <span id="targetPip">-</span></p>
     </div>
 
+    <!-- Pesan Error -->
     <div id="error" class="error" style="display: none;"></div>
   </div>
 
