@@ -17,8 +17,15 @@ async function fetchMarketData(type, symbol, market = "USD") {
     const response = await fetch(url);
     const data = await response.json();
 
+    console.log("Response API:", data);
+
+    if (data["Note"]) {
+      alert("⚠ API Rate Limit Tercapai: " + data["Note"]);
+      return [];
+    }
+
     if (!data["Time Series (5min)"]) {
-      alert("Data tidak ditemukan atau limit API tercapai.");
+      alert("⚠ Data tidak ditemukan atau format salah.");
       return [];
     }
 
@@ -29,8 +36,8 @@ async function fetchMarketData(type, symbol, market = "USD") {
       Volume: parseFloat(timeSeries[time]["5. volume"]),
     })).reverse();
   } catch (error) {
-    console.error("Error fetching market data:", error);
-    alert("Gagal mengambil data pasar.");
+    console.error("Gagal mengambil data:", error);
+    alert("❌ Gagal mengambil data. Cek console untuk detail.");
     return [];
   }
 }
@@ -149,7 +156,7 @@ async function getMarketAnalysis(type) {
   if (!data.length) return;
 
   analyzeStatistics(data, statsId);
-  
+
   if (type === "stock") {
     stockChart = visualizePrices(data, chartId, chartRef);
   } else if (type === "forex") {
