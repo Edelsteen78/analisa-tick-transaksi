@@ -1,4 +1,4 @@
-const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API key Anda
+const API_KEY = "YOUR_ALPHA_VANTAGE_API_KEY"; // Ganti dengan API key Anda
 
 // Variabel global untuk menyimpan simbol aktif
 let activeSymbol = null;
@@ -8,22 +8,40 @@ document.querySelectorAll(".symbol-btn").forEach((button) => {
   button.addEventListener("click", () => {
     const symbol = button.getAttribute("data-symbol");
 
-    if (activeSymbol === symbol) {
-      // Jika tombol yang sama ditekan lagi, nonaktifkan
-      button.classList.remove("active");
-      activeSymbol = null;
-    } else {
-      // Nonaktifkan semua tombol lainnya
-      document.querySelectorAll(".symbol-btn").forEach((btn) => {
-        btn.classList.remove("active");
-      });
+    // Nonaktifkan semua tombol terlebih dahulu
+    document.querySelectorAll(".symbol-btn").forEach((btn) => {
+      btn.classList.remove("active");
+    });
 
-      // Aktifkan tombol yang diklik
-      button.classList.add("active");
-      activeSymbol = symbol;
-    }
+    // Aktifkan tombol yang diklik
+    button.classList.add("active");
+    activeSymbol = symbol;
+
+    // Ambil data pasar untuk simbol yang aktif
+    fetchMarketData(symbol);
   });
 });
+
+async function fetchMarketData(symbol) {
+  try {
+    const response = await fetch(
+      `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`
+    );
+    const data = await response.json();
+
+    if (!data["Global Quote"] || !data["Global Quote"]["05. price"]) {
+      showError("Simbol tidak ditemukan atau data tidak tersedia.");
+      return;
+    }
+
+    const lastPrice = parseFloat(data["Global Quote"]["05. price"]);
+    document.getElementById("lastPrice").textContent = `$${lastPrice.toFixed(2)}`;
+    document.getElementById("output").style.display = "block";
+    document.getElementById("error").style.display = "none";
+  } catch (error) {
+    showError("Terjadi kesalahan saat mengambil data.");
+  }
+}
 
 async function fetchData() {
   if (!activeSymbol) {
