@@ -1,8 +1,7 @@
-const API_KEY = "YOUR_ALPHA_VANTAGE_API_KEY"; // Ganti dengan API key Anda
+const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API key Anda
 
-// Variabel global untuk menyimpan simbol aktif dan interval polling
+// Variabel global untuk menyimpan simbol aktif
 let activeSymbol = null;
-let pollingInterval = null;
 
 // Fungsi untuk menangani klik tombol simbol
 document.querySelectorAll(".symbol-btn").forEach((button) => {
@@ -13,8 +12,6 @@ document.querySelectorAll(".symbol-btn").forEach((button) => {
       // Jika tombol yang sama ditekan lagi, nonaktifkan
       button.classList.remove("active");
       activeSymbol = null;
-      clearInterval(pollingInterval); // Hentikan polling
-      document.getElementById("output").style.display = "none";
     } else {
       // Nonaktifkan semua tombol lainnya
       document.querySelectorAll(".symbol-btn").forEach((btn) => {
@@ -24,44 +21,42 @@ document.querySelectorAll(".symbol-btn").forEach((button) => {
       // Aktifkan tombol yang diklik
       button.classList.add("active");
       activeSymbol = symbol;
-
-      // Mulai polling data pasar
-      startPolling(symbol);
     }
   });
 });
 
-// Fungsi untuk memulai polling data pasar
-function startPolling(symbol) {
-  clearInterval(pollingInterval); // Pastikan tidak ada polling sebelumnya
+async function fetchData() {
+  if (!activeSymbol) {
+    showError("Silakan pilih simbol terlebih dahulu.");
+    return;
+  }
 
-  pollingInterval = setInterval(async () => {
-    try {
-      const response = await fetch(
-        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`
-      );
-      const data = await response.json();
+  const news = document.getElementById("news").value;
 
-      if (!data["Global Quote"] || !data["Global Quote"]["05. price"]) {
-        showError("Simbol tidak ditemukan atau data tidak tersedia.");
-        return;
-      }
+  try {
+    const response = await fetch(
+      `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${activeSymbol}&apikey=${API_KEY}`
+    );
+    const data = await response.json();
 
-      const lastPrice = parseFloat(data["Global Quote"]["05. price"]);
-      const news = document.getElementById("news").value;
-      const recommendation = analyzeData(lastPrice, news);
-      const targetPip = calculateTargetPip(lastPrice);
-
-      document.getElementById("lastPrice").textContent = `$${lastPrice.toFixed(2)}`;
-      document.getElementById("recommendation").textContent = recommendation;
-      document.getElementById("targetPip").textContent = `${targetPip} pip`;
-
-      document.getElementById("output").style.display = "block";
-      document.getElementById("error").style.display = "none";
-    } catch (error) {
-      showError("Terjadi kesalahan saat mengambil data.");
+    if (!data["Global Quote"] || !data["Global Quote"]["05. price"]) {
+      showError("Simbol tidak ditemukan atau data tidak tersedia.");
+      return;
     }
-  }, 5000); // Polling setiap 5 detik
+
+    const lastPrice = parseFloat(data["Global Quote"]["05. price"]);
+    const recommendation = analyzeData(lastPrice, news);
+    const targetPip = calculateTargetPip(lastPrice);
+
+    document.getElementById("lastPrice").textContent = `$${lastPrice.toFixed(2)}`;
+    document.getElementById("recommendation").textContent = recommendation;
+    document.getElementById("targetPip").textContent = `${targetPip} pip`;
+
+    document.getElementById("output").style.display = "block";
+    document.getElementById("error").style.display = "none";
+  } catch (error) {
+    showError("Terjadi kesalahan saat mengambil data.");
+  }
 }
 
 function analyzeData(price, news) {
