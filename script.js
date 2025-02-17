@@ -1,4 +1,4 @@
-const API_KEY = "YOUR_ALPHA_VANTAGE_API_KEY"; // Ganti dengan API key Anda
+const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API key Anda
 
 // Variabel global untuk menyimpan simbol aktif
 let activeSymbol = null;
