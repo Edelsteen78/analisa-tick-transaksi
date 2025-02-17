@@ -1,8 +1,8 @@
 const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
-let stockChart, forexChart, commodityChart, candleChart;
+let stockChart, forexChart, commodityChart, transactionChart, fundamentalChart;
 let autoFetchInterval;
 
-// Simbol populer
+// Simbol yang sering dipakai dalam trading
 const STOCKS = ["AAPL", "TSLA", "AMZN"];
 const FOREX = ["EUR/USD", "GBP/USD", "USD/JPY"];
 const COMMODITIES = ["XAU/USD", "XAG/USD", "WTI"];
@@ -52,23 +52,6 @@ function saveCheckboxState() {
     localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
 }
 
-// Fungsi untuk memulihkan state checkbox dari localStorage
-function restoreCheckboxState() {
-    let selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
-    let selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
-    let selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
-
-    document.querySelectorAll(".stock").forEach(checkbox => {
-        checkbox.checked = selectedStocks.includes(checkbox.value);
-    });
-    document.querySelectorAll(".forex").forEach(checkbox => {
-        checkbox.checked = selectedForex.includes(checkbox.value);
-    });
-    document.querySelectorAll(".commodity").forEach(checkbox => {
-        checkbox.checked = selectedCommodities.includes(checkbox.value);
-    });
-}
-
 // Fungsi untuk mengambil data dari Alpha Vantage
 async function fetchMarketData(type, symbol) {
     try {
@@ -94,26 +77,35 @@ async function fetchMarketData(type, symbol) {
     }
 }
 
-// Fungsi untuk menampilkan grafik candle dengan sinyal Buy/Sell
-function visualizeCandleChart(data) {
+// Fungsi untuk menampilkan grafik transaksi dari CSV
+function visualizeTransactionChart(data) {
     const labels = data.map(row => row.Time);
     const prices = data.map(row => row.Price);
-    const signals = data.map(row => row.Signal);
-
-    const buySignals = signals.map((signal, i) => (signal === "BUY" ? prices[i] : null));
-    const sellSignals = signals.map((signal, i) => (signal === "SELL" ? prices[i] : null));
-
-    const ctx = document.getElementById("candleChart").getContext("2d");
+    
+    const ctx = document.getElementById("transactionChart").getContext("2d");
     
     new Chart(ctx, {
         type: "line",
         data: {
             labels: labels,
-            datasets: [
-                { label: "Harga", data: prices, borderColor: "blue", borderWidth: 2, fill: false },
-                { label: "BUY", data: buySignals, backgroundColor: "green", pointRadius: 5, type: "scatter" },
-                { label: "SELL", data: sellSignals, backgroundColor: "red", pointRadius: 5, type: "scatter" }
-            ],
+            datasets: [{ label: "Harga Transaksi", data: prices, borderColor: "blue", borderWidth: 2, fill: false }],
+        },
+        options: { responsive: true, plugins: { legend: { display: true } } }
+    });
+}
+
+// Fungsi untuk menampilkan grafik berita fundamental
+function visualizeFundamentalChart(sentiment) {
+    const ctx = document.getElementById("fundamentalChart").getContext("2d");
+
+    new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: ["Positif", "Negatif"],
+            datasets: [{
+                data: sentiment === "positif" ? [70, 30] : [30, 70],
+                backgroundColor: ["green", "red"]
+            }]
         },
         options: { responsive: true, plugins: { legend: { display: true } } }
     });
@@ -124,8 +116,7 @@ async function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return alert("Pilih file CSV terlebih dahulu!");
     const rawData = await parseCSV(file);
-    const analyzedData = analyzeCandle(rawData);
-    visualizeCandleChart(analyzedData);
+    visualizeTransactionChart(rawData);
 }
 
 // Fungsi untuk menyimpan berita fundamental
@@ -134,17 +125,9 @@ function saveNews() {
     const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
     localStorage.setItem("newsImpact", impact);
     localStorage.setItem("newsSentiment", sentiment);
-}
-
-// Fungsi untuk memuat berita fundamental saat halaman dibuka kembali
-function loadNews() {
-    const impact = localStorage.getItem("newsImpact");
-    const sentiment = localStorage.getItem("newsSentiment");
-    if (impact) document.querySelector(`input[name="impact"][value="${impact}"]`).checked = true;
-    if (sentiment) document.querySelector(`input[name="sentiment"][value="${sentiment}"]`).checked = true;
+    visualizeFundamentalChart(sentiment);
 }
 
 window.onload = function () {
     generateCheckboxes();
-    loadNews();
 };
