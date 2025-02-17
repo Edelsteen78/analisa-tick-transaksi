@@ -1,28 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forex Analysis</title>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisis Pasar Otomatis</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Forex Market Analysis</h1>
-        <label for="symbol">Pilih Pasangan Mata Uang:</label>
-        <select id="symbol">
-            <option value="EURUSD">EUR/USD</option>
-            <option value="GBPUSD">GBP/USD</option>
-            <option value="USDJPY">USD/JPY</option>
-        </select>
+  <div class="container">
+    <h1>Analisis Pasar Otomatis</h1>
 
-        <canvas id="forexChart"></canvas>
+    <div class="section">
+      <h2>Analisis Saham</h2>
+      <input type="text" id="stockSymbol" placeholder="Contoh: AAPL, TSLA">
+      <button onclick="getMarketAnalysis('stock')">Ambil Data Saham</button>
+      <pre id="statsStock">Belum ada data.</pre>
+      <canvas id="stockChart"></canvas>
+      <pre id="predictionStock">Belum ada prediksi.</pre>
     </div>
 
-    <!-- Custom JavaScript -->
-    <script src="script.js"></script>
+    <div class="section">
+      <h2>Analisis Forex</h2>
+      <input type="text" id="forexSymbol" placeholder="Contoh: EUR, JPY">
+      <button onclick="getMarketAnalysis('forex')">Ambil Data Forex</button>
+      <pre id="statsForex">Belum ada data.</pre>
+      <canvas id="forexChart"></canvas>
+      <pre id="predictionForex">Belum ada prediksi.</pre>
+    </div>
+
+    <div class="section">
+      <h2>Analisis Komoditas</h2>
+      <input type="text" id="commoditySymbol" placeholder="Contoh: XAU, XAG">
+      <button onclick="getMarketAnalysis('commodity')">Ambil Data Komoditas</button>
+      <pre id="statsCommodity">Belum ada data.</pre>
+      <canvas id="commodityChart"></canvas>
+      <pre id="predictionCommodity">Belum ada prediksi.</pre>
+    </div>
+  </div>
 </body>
 </html>
