@@ -2,12 +2,12 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Analisis Pasar Otomatis</title>
+    <title>Analisis Trading Otomatis</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Analisis Pasar & Berita Fundamental</h1>
+    <h1>Analisis Trading Otomatis</h1>
     
     <h2>Berita Fundamental</h2>
     <label><input type="radio" name="impact" value="pendek"> Pendek</label>
@@ -22,7 +22,13 @@
     <input type="file" id="csvFileInput" accept=".csv">
     <button onclick="handleFileUpload(event)">Analisis Data</button>
 
-    <h2>Grafik Candle</h2>
-    <canvas id="candleChart"></canvas>
+    <h2>Grafik Data Pasar</h2>
+    <canvas id="marketChart"></canvas>
+
+    <h2>Grafik Transaksi CSV</h2>
+    <canvas id="transactionChart"></canvas>
+
+    <h2>Grafik Berita Fundamental</h2>
+    <canvas id="fundamentalChart"></canvas>
 </body>
 </html>
