@@ -1,4 +1,4 @@
-const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
+const API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key Alpha Vantage
 let stockChart, forexChart, commodityChart;
 let autoFetchInterval;
 
@@ -13,8 +13,12 @@ function generateCheckboxes() {
   createCheckboxes("forexList", FOREX, "forex");
   createCheckboxes("commodityList", COMMODITIES, "commodity");
 
-  // Memulihkan pilihan checkbox dari localStorage
   restoreCheckboxState();
+
+  // Jalankan auto-fetch jika ada yang dicentang sebelumnya
+  if (localStorage.getItem("autoFetchRunning") === "true") {
+    autoFetchData();
+  }
 }
 
 // Fungsi untuk membuat checkbox per kategori
@@ -25,7 +29,7 @@ function createCheckboxes(containerId, symbols, className) {
     checkbox.type = "checkbox";
     checkbox.value = symbol;
     checkbox.classList.add(className);
-    
+
     let label = document.createElement("label");
     label.appendChild(checkbox);
     label.appendChild(document.createTextNode(` ${symbol}`));
@@ -146,6 +150,7 @@ function visualizePrices(data, canvasId, chartRef) {
 // Fungsi untuk mengambil data otomatis berdasarkan checkbox yang dicentang
 async function autoFetchData() {
   document.getElementById("statusMessage").textContent = "⏳ Mengambil data otomatis...";
+  localStorage.setItem("autoFetchRunning", "true");
 
   autoFetchInterval = setInterval(async () => {
     console.log("🔄 Memulai pengambilan data otomatis...");
@@ -173,6 +178,7 @@ async function autoFetchData() {
 function stopAutoFetch() {
   clearInterval(autoFetchInterval);
   document.getElementById("statusMessage").textContent = "🛑 Auto-fetching dihentikan.";
+  localStorage.setItem("autoFetchRunning", "false");
 }
 
 // Fungsi untuk me-refresh halaman otomatis setiap 5 menit
