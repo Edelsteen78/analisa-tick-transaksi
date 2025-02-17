@@ -6,24 +6,23 @@
   <title>Analisis Pasar Otomatis</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
   <div class="container">
     <h1>Analisis Pasar Otomatis</h1>
 
-    <h2>Pilih Data yang Akan Diambil Otomatis</h2>
-    <label><input type="checkbox" id="autoStock"> Saham</label>
-    <label><input type="checkbox" id="autoForex"> Forex</label>
-    <label><input type="checkbox" id="autoCommodity"> Komoditas</label>
-    
     <button onclick="autoFetchData()">Mulai Ambil Data Otomatis</button>
     <button onclick="stopAutoFetch()">Hentikan</button>
+    <p id="statusMessage">Belum berjalan.</p>
 
-    <h2>Grafik Harga</h2>
+    <h2>Grafik Saham</h2>
     <canvas id="stockChart"></canvas>
+
+    <h2>Grafik Forex</h2>
     <canvas id="forexChart"></canvas>
+
+    <h2>Grafik Komoditas</h2>
     <canvas id="commodityChart"></canvas>
   </div>
 </body>
