@@ -1,59 +1,84 @@
-// Fungsi untuk parsing file CSV
-function parseCSV(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target.result;
-      const rows = text.split("\n").map(row => row.split(","));
-      const headers = rows[0];
-      const data = rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((header, i) => {
-          obj[header.trim()] = row[i] ? parseFloat(row[i].trim()) : null;
-        });
-        return obj;
-      });
-      resolve(data);
-    };
-    reader.onerror = (error) => reject(error);
-    reader.readAsText(file);
-  });
+const API_KEY = "V5YBXFRFAH5PT6UL"; // Ganti dengan API Key Alpha Vantage
+let model;
+let stockChart, forexChart, commodityChart;
+
+// Fungsi untuk mengambil data dari Alpha Vantage
+async function fetchMarketData(type, symbol, market = "USD") {
+  try {
+    let url = "";
+    if (type === "stock") {
+      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
+    } else if (type === "forex") {
+      url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${symbol}&to_symbol=${market}&interval=5min&apikey=${API_KEY}`;
+    } else if (type === "commodity") {
+      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`;
+    }
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!data["Time Series (5min)"]) {
+      alert("Data tidak ditemukan atau limit API tercapai.");
+      return [];
+    }
+
+    const timeSeries = data["Time Series (5min)"];
+    return Object.keys(timeSeries).map((time) => ({
+      Time: time,
+      Price: parseFloat(timeSeries[time]["1. open"]),
+      Volume: parseFloat(timeSeries[time]["5. volume"]),
+    })).reverse();
+  } catch (error) {
+    console.error("Error fetching market data:", error);
+    alert("Gagal mengambil data pasar.");
+    return [];
+  }
 }
 
-// Fungsi untuk analisis statistik dasar
-function analyzeStatistics(data) {
-  const prices = data.map(row => row.Price).filter(price => !isNaN(price));
-  const volumes = data.map(row => row.Volume).filter(volume => !isNaN(volume));
+// Fungsi untuk analisis statistik
+function analyzeStatistics(data, outputElementId) {
+  if (!data.length) return;
+
+  const prices = data.map((row) => row.Price).filter((p) => !isNaN(p));
+  const volumes = data.map((row) => row.Volume).filter((v) => !isNaN(v));
 
   const stats = {
     totalTransactions: data.length,
     highestPrice: Math.max(...prices),
     lowestPrice: Math.min(...prices),
-    averagePrice: prices.reduce((sum, price) => sum + price, 0) / prices.length,
+    averagePrice: (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2),
     totalVolume: volumes.reduce((sum, volume) => sum + volume, 0),
   };
 
-  document.getElementById("statsOutput").textContent = JSON.stringify(stats, null, 2);
-  return stats;
+  document.getElementById(outputElementId).textContent = JSON.stringify(stats, null, 2);
 }
 
-// Fungsi untuk visualisasi grafik harga
-function visualizePrices(data) {
-  const labels = data.map(row => row.Time);
-  const prices = data.map(row => row.Price);
+// Fungsi untuk menampilkan grafik
+function visualizePrices(data, canvasId, chartRef) {
+  if (!data.length) return;
 
-  const ctx = document.getElementById("priceChart").getContext("2d");
-  new Chart(ctx, {
+  const labels = data.map((row) => row.Time);
+  const prices = data.map((row) => row.Price);
+
+  const ctx = document.getElementById(canvasId).getContext("2d");
+
+  if (chartRef) {
+    chartRef.destroy();
+  }
+
+  return new Chart(ctx, {
     type: "line",
     data: {
       labels: labels,
-      datasets: [{
-        label: "Harga",
-        data: prices,
-        borderColor: "blue",
-        borderWidth: 2,
-        fill: false,
-      }],
+      datasets: [
+        {
+          label: "Harga",
+          data: prices,
+          borderColor: "blue",
+          borderWidth: 2,
+          fill: false,
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -65,42 +90,75 @@ function visualizePrices(data) {
 }
 
 // Fungsi untuk memuat model ML
-let model;
 async function loadModel() {
-  model = await tf.loadLayersModel("tfjs_model/model.json"); // Pastikan path benar
+  try {
+    model = await tf.loadLayersModel("tfjs_model/model.json");
+    console.log("Model berhasil dimuat.");
+  } catch (error) {
+    console.error("Gagal memuat model:", error);
+  }
 }
 
 // Fungsi untuk prediksi harga menggunakan model ML
-async function predictPrice() {
-  if (!model) {
-    alert("Model belum dimuat. Silakan muat model terlebih dahulu.");
-    return;
-  }
+async function predictPrice(data, outputElementId) {
+  if (!model || !data.length) return;
 
-  const lastPrice = 110; // Contoh input: harga terakhir
-  const lastVolume = 1000; // Contoh input: volume terakhir
-  const input = tf.tensor2d([[lastPrice, lastVolume]]);
+  const lastData = data[data.length - 1];
+  const input = tf.tensor2d([[lastData.Price, lastData.Volume]]);
   const prediction = model.predict(input);
   const result = prediction.dataSync()[0];
-  document.getElementById("predictionOutput").textContent = `Harga Prediksi: ${result.toFixed(2)}`;
+
+  document.getElementById(outputElementId).textContent = `Harga Prediksi: ${result.toFixed(2)}`;
 }
 
-// Fungsi utama untuk analisis data
-async function analyzeData() {
-  const fileInput = document.getElementById("csvFileInput");
-  if (!fileInput.files.length) {
-    alert("Silakan unggah file CSV terlebih dahulu.");
+// Fungsi utama untuk mengambil dan menampilkan data
+async function getMarketAnalysis(type) {
+  let symbol = "";
+  let market = "USD"; 
+  let statsId = "";
+  let chartId = "";
+  let predictionId = "";
+  let chartRef;
+
+  if (type === "stock") {
+    symbol = document.getElementById("stockSymbol").value.toUpperCase();
+    statsId = "statsStock";
+    chartId = "stockChart";
+    predictionId = "predictionStock";
+    chartRef = stockChart;
+  } else if (type === "forex") {
+    symbol = document.getElementById("forexSymbol").value.toUpperCase();
+    statsId = "statsForex";
+    chartId = "forexChart";
+    predictionId = "predictionForex";
+    chartRef = forexChart;
+  } else if (type === "commodity") {
+    symbol = document.getElementById("commoditySymbol").value.toUpperCase();
+    statsId = "statsCommodity";
+    chartId = "commodityChart";
+    predictionId = "predictionCommodity";
+    chartRef = commodityChart;
+  }
+
+  if (!symbol) {
+    alert("Masukkan simbol terlebih dahulu.");
     return;
   }
 
-  const file = fileInput.files[0];
-  const data = await parseCSV(file);
+  const data = await fetchMarketData(type, symbol, market);
+  if (!data.length) return;
 
-  // Analisis statistik
-  analyzeStatistics(data);
+  analyzeStatistics(data, statsId);
+  
+  if (type === "stock") {
+    stockChart = visualizePrices(data, chartId, chartRef);
+  } else if (type === "forex") {
+    forexChart = visualizePrices(data, chartId, chartRef);
+  } else if (type === "commodity") {
+    commodityChart = visualizePrices(data, chartId, chartRef);
+  }
 
-  // Visualisasi grafik
-  visualizePrices(data);
+  predictPrice(data, predictionId);
 }
 
 // Muat model saat halaman dimuat
