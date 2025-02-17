@@ -1,5 +1,5 @@
 const API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key Alpha Vantage
-let marketChart, transactionChart, fundamentalChart;
+let marketChart, transactionChart, candleChart, fundamentalChart;
 let autoFetchInterval;
 
 // Simbol yang sering dipakai dalam trading
@@ -52,23 +52,6 @@ function saveCheckboxState() {
     localStorage.setItem("selectedCommodities", JSON.stringify(selectedCommodities));
 }
 
-// Fungsi untuk memulihkan state checkbox dari localStorage
-function restoreCheckboxState() {
-    let selectedStocks = JSON.parse(localStorage.getItem("selectedStocks")) || [];
-    let selectedForex = JSON.parse(localStorage.getItem("selectedForex")) || [];
-    let selectedCommodities = JSON.parse(localStorage.getItem("selectedCommodities")) || [];
-
-    document.querySelectorAll(".stock").forEach(checkbox => {
-        checkbox.checked = selectedStocks.includes(checkbox.value);
-    });
-    document.querySelectorAll(".forex").forEach(checkbox => {
-        checkbox.checked = selectedForex.includes(checkbox.value);
-    });
-    document.querySelectorAll(".commodity").forEach(checkbox => {
-        checkbox.checked = selectedCommodities.includes(checkbox.value);
-    });
-}
-
 // Fungsi untuk mengambil data dari Alpha Vantage
 async function fetchMarketData(type, symbol) {
     try {
@@ -94,11 +77,11 @@ async function fetchMarketData(type, symbol) {
     }
 }
 
-// Fungsi untuk menampilkan grafik market dari Alpha Vantage
-function visualizeMarketChart(data) {
-    const labels = data.map(row => row.Time);
-    const prices = data.map(row => row.Price);
-    
+// Fungsi untuk menggabungkan data Alpha Vantage dan CSV dalam satu chart
+function visualizeMarketChart(dataAlpha, dataCSV) {
+    const labels = [...dataAlpha.map(row => row.Time), ...dataCSV.map(row => row.Time)];
+    const prices = [...dataAlpha.map(row => row.Price), ...dataCSV.map(row => row.Price)];
+
     const ctx = document.getElementById("marketChart").getContext("2d");
     
     new Chart(ctx, {
@@ -133,13 +116,13 @@ async function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return alert("Pilih file CSV terlebih dahulu!");
     const rawData = await parseCSV(file);
-    visualizeMarketChart(rawData);
+    visualizeMarketChart([], rawData);
 }
 
 // Fungsi untuk menyimpan berita fundamental
 function saveNews() {
     const impact = document.querySelector('input[name="impact"]:checked').value;
-    const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
+    const sentiment = document.querySelector('input[name="sentiment"]:checked").value;
     localStorage.setItem("newsImpact", impact);
     localStorage.setItem("newsSentiment", sentiment);
     visualizeFundamentalChart(sentiment);
